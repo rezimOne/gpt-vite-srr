@@ -1,13 +1,12 @@
 <template>
   <h1>Welcome</h1>
-  This page is:
-  <ul>
-    <li>Rendered to.</li>
-    <li>Interactive. <Counter /></li>
-  </ul>
+  {{  message }}
+    <p>Interactive <Counter /></p>
 </template>
 
 <script lang="ts" setup>
+
+const message = 'I do some </> stuff'
 
 import Counter from './Counter.vue'
 </script>

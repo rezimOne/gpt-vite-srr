@@ -1,6 +1,8 @@
 <template>
-  <h1>About me</h1>
+  <h1>me</h1>
   <p>Example of app using <code>vite-plugin-ssr</code>.</p>
+  <h1>ai</h1>
+  <p>Example of app using <code>ai</code>.</p>
 </template>
 
 <script lang="ts" setup>

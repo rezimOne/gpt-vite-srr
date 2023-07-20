@@ -15,12 +15,21 @@ startServer()
 async function startServer() {
   const port = process.env.PORT!;
   const model = process.env.MODEL!;
+  const chatModel = process.env.CHAT_MODEL!;
   const app = express();
 
   const configuration = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
   });
   const openai = new OpenAIApi(configuration);
+
+  const completionSettings = {
+    temperature: 0.888,
+    max_tokens: 2048,
+    frequency_penalty: 0,
+    presence_penalty: 0,
+    top_p: 1
+  }
 
   app.use(compression());
 
@@ -52,13 +61,48 @@ async function startServer() {
         const response = await openai.createCompletion({
           model: model,
           prompt: prompt,
-          max_tokens: 3000,
-          // temperature: 0,
-          // top_p: 1,
-          // frequency_penalty: 0,
-          // presence_penalty: 0
+          ...completionSettings
         });
         const completion = response.data.choices[0].text;
+        return res.status(200).json({
+          message: completion
+        });
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.status);
+        console.log(error.response.data);
+      } else {
+        console.log(error.message);
+      }
+    };
+  });
+
+  app.post('/component-factory/chat-completion', async(req, res, next) => {
+    const inputValue = req.query.inputValue;
+    const isUserAuthorized = req.query.isUserAuthorized;
+    const prompt = `${ inputValue }`;
+
+    try {
+      if (isUserAuthorized) {
+        if (prompt === null) {
+          console.log('no prompt provided');
+          return;
+        }
+        const response = await openai.createChatCompletion({
+          model: chatModel,
+          ...completionSettings,
+          messages: [{
+                  "role": "system",
+                  "content": "You are a helpful assistant."
+                },
+                {
+                  role: "user",
+                  content: prompt
+              }]
+        });
+        const completion = response.data.choices[0].message;
+        console.log('completion: ', completion?.content);
         return res.status(200).json({
           message: completion
         });

@@ -25,7 +25,7 @@ export default function useOpenAiApi () {
   const get = <T extends keyof UseOpenApiState>(parametr: T) =>
     state[parametr];
 
-  const getResponse = async (input: string, isUserAuthorized: boolean): Promise<any> => {
+  const getCompletion = async (input: string, isUserAuthorized: boolean): Promise<any> => {
     await axios({
       method: 'POST',
       url: 'http://localhost:3000/component-factory/completion',
@@ -41,9 +41,26 @@ export default function useOpenAiApi () {
     }).catch(err => console.log(err));
   };
 
+  const getChatCompletion = async (input: string, isUserAuthorized: boolean): Promise<any> => {
+    await axios({
+      method: 'POST',
+      url: 'http://localhost:3000/component-factory/chat-completion',
+      headers: {
+      ' Content-Type': 'application/json'
+      },
+      params: {
+        isUserAuthorized: isUserAuthorized,
+        inputValue: input
+      }
+    }).then(res => {
+      state.response = res.data.message;
+    }).catch(err => console.log(err));
+  };
+
   return {
     set,
     get,
-    getResponse
+    getCompletion,
+    getChatCompletion
   }
 }

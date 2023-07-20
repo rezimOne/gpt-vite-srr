@@ -6,7 +6,7 @@
       </a>
       <Link href="/">Home</Link>
       <Link href="/about">About</Link>
-      <Link href="/component-factory">Component Factory</Link>
+      <Link href="/chat">Chat</Link>
     </div>
     <div class="content"><slot /></div>
   </div>
