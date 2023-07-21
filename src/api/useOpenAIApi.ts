@@ -1,18 +1,19 @@
 
 import axios  from 'axios'
 import { reactive, watch } from 'vue';
-import type { UseOpenApiState } from './types';
+import type { CompletionData, UseOpenApiState } from './types';
+import jsonData from '../mocks/prompts.json';
 
 const state = reactive<UseOpenApiState>({
-  isActive: false,
-  response: null
+  completionData: null,
+  history: [],
+  role: undefined,
+  lastSessionId: ''
 });
 
 watch(
-  (): string | null => state.response,
-  (resposne) => {
-    console.log('state.response: ', resposne);
-  }
+  () => state.history,
+  (data): void => console.log('state.history: ', data), {deep: true}
 );
 
 export default function useOpenAiApi () {
@@ -25,7 +26,11 @@ export default function useOpenAiApi () {
   const get = <T extends keyof UseOpenApiState>(parametr: T) =>
     state[parametr];
 
-  const getCompletion = async (input: string, isUserAuthorized: boolean): Promise<any> => {
+  const setChatRole = () => {
+    return jsonData.prompts.vueDeveloper;
+  }
+
+  const getCompletion = async (text: string, isUserAuthorized: boolean): Promise<any> => {
     await axios({
       method: 'POST',
       url: 'http://localhost:3000/component-factory/completion',
@@ -34,14 +39,28 @@ export default function useOpenAiApi () {
       },
       params: {
         isUserAuthorized: isUserAuthorized,
-        inputValue: input
+        text: text,
+        chatRole: setChatRole()
       }
     }).then(res => {
-      state.response = res.data.message;
+      state.completionData = res.data.completion
+      state.history.push({
+        user: {
+          id: 'user_id',
+          created: 200,
+          message: {
+            content: text,
+            role: 'user'
+          }
+        },
+        chat: {
+          ...res.data.completion
+        }
+      })
     }).catch(err => console.log(err));
   };
 
-  const getChatCompletion = async (input: string, isUserAuthorized: boolean): Promise<any> => {
+  const getChatCompletion = async (text: string, isUserAuthorized: boolean): Promise<any> => {
     await axios({
       method: 'POST',
       url: 'http://localhost:3000/component-factory/chat-completion',
@@ -50,17 +69,39 @@ export default function useOpenAiApi () {
       },
       params: {
         isUserAuthorized: isUserAuthorized,
-        inputValue: input
+        text: text,
+        chatRole: setChatRole()
       }
     }).then(res => {
-      state.response = res.data.message;
+      state.completionData = res.data.completion
+      state.history.push({
+        user: {
+          sessionId: state.lastSessionId,
+          id: 'user_id',
+          created: Date.now(),
+          message: {
+            content: text,
+            role: 'user'
+          }
+        },
+        chat: {
+          sessionId: state.lastSessionId,
+          ...res.data.completion
+        }
+      })
     }).catch(err => console.log(err));
   };
+
+  const createChatSession = (payload: string) => {
+    state.lastSessionId = payload;
+  }
 
   return {
     set,
     get,
     getCompletion,
-    getChatCompletion
+    getChatCompletion,
+    setChatRole,
+    createChatSession
   }
 }

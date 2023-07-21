@@ -3,9 +3,10 @@
 import express from 'express'
 import compression from 'compression'
 import { renderPage } from 'vite-plugin-ssr/server'
-import { root } from './root.js'
+import { rootPath } from './root.js'
 import dotenv from 'dotenv';
 import { Configuration, OpenAIApi } from 'openai';
+
 dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -35,12 +36,12 @@ async function startServer() {
 
   if (isProduction) {
     const sirv = (await import('sirv')).default
-    app.use(sirv(`${root}/dist/client`))
+    app.use(sirv(`${rootPath}/dist/client`))
   } else {
     const vite = await import('vite')
     const viteDevMiddleware = (
       await vite.createServer({
-        root,
+        root: rootPath,
         server: { middlewareMode: true }
       })
     ).middlewares
@@ -48,12 +49,12 @@ async function startServer() {
   }
 
   app.post('/component-factory/completion', async(req, res, next) => {
-    const inputValue = req.query.inputValue;
+    const text = req.query.text;
     const isUserAuthorized = req.query.isUserAuthorized;
-    const prompt = `${ inputValue }`;
+    const prompt = `${ text }`;
 
     try {
-      if (isUserAuthorized) {
+      if (isUserAuthorized && completionSettings) {
         if (prompt === null) {
           console.log('no prompt provided');
           return;
@@ -64,6 +65,7 @@ async function startServer() {
           ...completionSettings
         });
         const completion = response.data.choices[0].text;
+        console.log('completion: ', completion);
         return res.status(200).json({
           message: completion
         });
@@ -79,12 +81,14 @@ async function startServer() {
   });
 
   app.post('/component-factory/chat-completion', async(req, res, next) => {
-    const inputValue = req.query.inputValue;
+    const text = req.query.text;
     const isUserAuthorized = req.query.isUserAuthorized;
-    const prompt = `${ inputValue }`;
+    const chatRole = req.query.chatRole;
+    console.log('chatRole: ', (chatRole as string[]).join(', '));
+    const prompt = `${ text }`;
 
     try {
-      if (isUserAuthorized) {
+      if (isUserAuthorized && completionSettings) {
         if (prompt === null) {
           console.log('no prompt provided');
           return;
@@ -92,19 +96,27 @@ async function startServer() {
         const response = await openai.createChatCompletion({
           model: chatModel,
           ...completionSettings,
-          messages: [{
+          messages: [
+                {
                   "role": "system",
-                  "content": "You are a helpful assistant."
+                  "content": `${(chatRole as string[]).join(', ')}`
                 },
                 {
                   role: "user",
                   content: prompt
               }]
         });
-        const completion = response.data.choices[0].message;
-        console.log('completion: ', completion?.content);
+        //const completion = response.data.choices[0].message;
+        const completion = {
+          id: response.data.id,
+          created: response.data.created,
+          message: response.data.choices[0].message
+        }
+        console.log('completion: ', completion);
+        console.log('response: ', response);
+        //console.log('completion: ', completion?.role);
         return res.status(200).json({
-          message: completion
+          completion: completion,
         });
       }
     } catch (error: any) {

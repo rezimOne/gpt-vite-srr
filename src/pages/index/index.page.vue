@@ -1,7 +1,6 @@
 <template>
   <h1>Welcome</h1>
   {{  message }}
-    <p>Interactive <Counter /></p>
 </template>
 
 <script lang="ts" setup>

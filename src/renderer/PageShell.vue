@@ -7,6 +7,7 @@
       <Link href="/">Home</Link>
       <Link href="/about">About</Link>
       <Link href="/chat">Chat</Link>
+      <Link href="/custom-component">Component</Link>
     </div>
     <div class="content"><slot /></div>
   </div>
@@ -20,6 +21,7 @@ import Link from './Link.vue'
 body {
   margin: 0;
   font-family: sans-serif;
+  background: rgb(98, 128, 105);
 }
 * {
   box-sizing: border-box;
