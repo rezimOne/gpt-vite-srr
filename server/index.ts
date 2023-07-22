@@ -1,40 +1,20 @@
 // Note that this file isn't processed by Vite, see https://github.com/brillout/vite-plugin-ssr/issues/562
-
 import express from 'express'
 import compression from 'compression'
 import { renderPage } from 'vite-plugin-ssr/server'
 import { rootPath } from './root.js'
-import dotenv from 'dotenv';
-import { Configuration, OpenAIApi } from 'openai';
-
-dotenv.config();
-
-const isProduction = process.env.NODE_ENV === 'production'
+import { OpenAIApi } from 'openai';
+import { COMPLETION_SETTINGS, CHATMODEL, PORT, MODEL, ISPRODUCTION, CONFIGURATION, completionModel} from './utils.js';
 
 startServer()
 
 async function startServer() {
-  const port = process.env.PORT!;
-  const model = process.env.MODEL!;
-  const chatModel = process.env.CHAT_MODEL!;
+  const openai = new OpenAIApi(CONFIGURATION);
+
   const app = express();
-
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const openai = new OpenAIApi(configuration);
-
-  const completionSettings = {
-    temperature: 0.888,
-    max_tokens: 2048,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    top_p: 1
-  }
-
   app.use(compression());
 
-  if (isProduction) {
+  if (ISPRODUCTION) {
     const sirv = (await import('sirv')).default
     app.use(sirv(`${rootPath}/dist/client`))
   } else {
@@ -48,54 +28,49 @@ async function startServer() {
     app.use(viteDevMiddleware);
   }
 
-  app.post('/component-factory/completion', async(req, res, next) => {
+  app.post('/completion', async(req, res, next) => {
     const text = req.query.text;
     const isUserAuthorized = req.query.isUserAuthorized;
     const prompt = `${ text }`;
 
     try {
-      if (isUserAuthorized && completionSettings) {
+      if (isUserAuthorized && COMPLETION_SETTINGS) {
         if (prompt === null) {
           console.log('no prompt provided');
           return;
         }
         const response = await openai.createCompletion({
-          model: model,
+          model: MODEL!,
           prompt: prompt,
-          ...completionSettings
+          ...COMPLETION_SETTINGS
         });
         const completion = response.data.choices[0].text;
-        console.log('completion: ', completion);
+        //console.log('completion: ', completion);
         return res.status(200).json({
           message: completion
         });
       }
-    } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.status);
-        console.log(error.response.data);
-      } else {
-        console.log(error.message);
-      }
-    };
+    } catch (err: any) {
+      console.log(err);
+    }
   });
 
-  app.post('/component-factory/chat-completion', async(req, res, next) => {
+  app.post('/chat-completion', async(req, res, next) => {
     const text = req.query.text;
     const isUserAuthorized = req.query.isUserAuthorized;
     const chatRole = req.query.chatRole;
-    console.log('chatRole: ', (chatRole as string[]).join(', '));
+    // console.log('chatRole: ', (chatRole as string[]).join(', '));
     const prompt = `${ text }`;
 
     try {
-      if (isUserAuthorized && completionSettings) {
+      if (isUserAuthorized && COMPLETION_SETTINGS) {
         if (prompt === null) {
           console.log('no prompt provided');
           return;
         }
         const response = await openai.createChatCompletion({
-          model: chatModel,
-          ...completionSettings,
+          model: CHATMODEL!,
+          ...COMPLETION_SETTINGS,
           messages: [
                 {
                   "role": "system",
@@ -106,31 +81,26 @@ async function startServer() {
                   content: prompt
               }]
         });
-        //const completion = response.data.choices[0].message;
-        const completion = {
-          id: response.data.id,
-          created: response.data.created,
-          message: response.data.choices[0].message
-        }
-        console.log('completion: ', completion);
-        console.log('response: ', response);
-        //console.log('completion: ', completion?.role);
+
+        const completion = completionModel(response);
+        //console.log('chat message: ', completion.message?.content);
         return res.status(200).json({
           completion: completion,
         });
       }
-    } catch (error: any) {
-      if (error.response) {
-        console.log(error.response.status);
-        console.log(error.response.data);
-      } else {
-        console.log(error.message);
-      }
-    };
+    } catch (err: any) {
+        console.log(err);
+    }
+  })
+
+  app.get('/chat/sessionStatus', async(req, res, next) => {
+    const sessionStatus =  req.query.sessionStatus;
+    return res.status(200).json({
+      isSessionOpen: sessionStatus
+    });
   });
 
   app.get('*', async (req, res, next) => {
-    //console.log('req:',req)
     const pageContextInit = {
       urlOriginal: req.originalUrl
     };
@@ -151,6 +121,6 @@ async function startServer() {
     res.status(statusCode).type(contentType).send(body);
   })
 
-  app.listen(port);
-  console.log(`SERVER STARTED: http://localhost:${ port }`);
+  app.listen(PORT);
+  console.log(`SERVER STARTED: http://localhost:${ PORT }`);
 };

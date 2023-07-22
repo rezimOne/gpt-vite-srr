@@ -1,22 +1,23 @@
 
 import axios  from 'axios'
 import { reactive, watch } from 'vue';
-import type { CompletionData, UseOpenApiState } from './types';
+import type { UseOpenApiState } from './types';
 import jsonData from '../mocks/prompts.json';
+import { useChatSession } from '../composables/useChatSession';
 
 const state = reactive<UseOpenApiState>({
   completionData: null,
   history: [],
   role: undefined,
-  lastSessionId: ''
 });
 
-watch(
-  () => state.history,
-  (data): void => console.log('state.history: ', data), {deep: true}
-);
+// watch(
+//   () => state.history,
+//   (data): void => console.log('state.history: ', data), {deep: true}
+// );
 
 export default function useOpenAiApi () {
+
   const set = <T extends keyof UseOpenApiState>(
     parameter: T,
     value: UseOpenApiState[T]
@@ -31,69 +32,105 @@ export default function useOpenAiApi () {
   }
 
   const getCompletion = async (text: string, isUserAuthorized: boolean): Promise<any> => {
-    await axios({
-      method: 'POST',
-      url: 'http://localhost:3000/component-factory/completion',
-      headers: {
-      ' Content-Type': 'application/json'
-      },
-      params: {
-        isUserAuthorized: isUserAuthorized,
-        text: text,
-        chatRole: setChatRole()
-      }
-    }).then(res => {
-      state.completionData = res.data.completion
-      state.history.push({
-        user: {
-          id: 'user_id',
-          created: 200,
-          message: {
-            content: text,
-            role: 'user'
-          }
+    try {
+      const response = await axios({
+        method: 'POST',
+        url: 'http://localhost:3000/completion',
+        headers: {
+        ' Content-Type': 'application/json'
         },
-        chat: {
-          ...res.data.completion
+        params: {
+          isUserAuthorized: isUserAuthorized,
+          text: text,
+          chatRole: setChatRole()
         }
-      })
-    }).catch(err => console.log(err));
+      });
+
+      if (response && response.status === 200) {
+
+        console.log(`%c 🤖 ${ response.data.completion.message.content }`, 'color: #F4B10A');
+        state.completionData = response.data.completion;
+
+        state.history.push({
+          user: {
+            sessionId: useChatSession().get('sessionId'),
+            id: 'user_id',
+            created: Date.now(),
+            message: {
+              content: text,
+              role: 'user'
+            }
+          },
+          chat: {
+            sessionId: useChatSession().get('sessionId'),
+            ...response.data.completion,
+            created: Date.now(),
+          }
+        });
+      }
+    } catch(e) {
+      console.log(e);
+    }
   };
 
   const getChatCompletion = async (text: string, isUserAuthorized: boolean): Promise<any> => {
-    await axios({
-      method: 'POST',
-      url: 'http://localhost:3000/component-factory/chat-completion',
-      headers: {
-      ' Content-Type': 'application/json'
-      },
-      params: {
-        isUserAuthorized: isUserAuthorized,
-        text: text,
-        chatRole: setChatRole()
-      }
-    }).then(res => {
-      state.completionData = res.data.completion
+    try {
       state.history.push({
-        user: {
-          sessionId: state.lastSessionId,
-          id: 'user_id',
-          created: Date.now(),
-          message: {
-            content: text,
-            role: 'user'
-          }
-        },
-        chat: {
-          sessionId: state.lastSessionId,
-          ...res.data.completion
+        sessionId: useChatSession().get('sessionId'),
+        id: 'user_id',
+        created: Date.now(),
+        message: {
+          content: text,
+          role: 'user'
         }
-      })
-    }).catch(err => console.log(err));
+      });
+      console.log(`%c 👤 ${ text }`, 'color: #6D8ED4');
+      const response = await axios({
+        method: 'POST',
+        url: 'http://localhost:3000/chat-completion',
+        headers: {
+        ' Content-Type': 'application/json'
+        },
+        params: {
+          isUserAuthorized: isUserAuthorized,
+          text: text,
+          chatRole: setChatRole()
+        }
+      });
+      if (response && response.status === 200) {
+
+        console.log(`%c 🤖 ${ response.data.completion.message.content }`, 'color: #F4B10A');
+        state.completionData = response.data.completion;
+
+        state.history.push(
+          {
+            sessionId: useChatSession().get('sessionId'),
+            ...response.data.completion,
+            created: Date.now(),
+          }
+        );
+      }
+    } catch(e) {
+      console.log(e);
+    }
   };
 
-  const createChatSession = (payload: string) => {
-    state.lastSessionId = payload;
+  const getSessionStatus = async (payload: boolean) => {
+    try{
+      const response = await axios({
+        method: 'GET',
+        url: 'http://localhost:3000/chat/sessionStatus',
+        params: {
+          sessionStatus: payload
+        }
+      });
+      if (response.status === 200) {
+        useChatSession().set('sessionStatus', response.data);
+        return response;
+      }
+    } catch (err){
+      console.log(err);
+    }
   }
 
   return {
@@ -102,6 +139,6 @@ export default function useOpenAiApi () {
     getCompletion,
     getChatCompletion,
     setChatRole,
-    createChatSession
+    getSessionStatus
   }
 }

@@ -44,11 +44,10 @@
     margin: 0;
     display: flex;
     flex-direction: row;
-    //salign-items: flex-start;
+    align-items: center;
   }
 
   li {
-    //margin-bottom: 10px;
 
     a {
       display: flex;
@@ -63,20 +62,10 @@
       }
 
       span {
-        margin-left: 12px;
+        margin: 0 12px;
       }
-
-      .hover-effect {
-        width: 100%;
-        height: 2px;
-        background-color: #ff5c5c;
-        position: absolute;
-        bottom: -2px;
-        transition: transform 0.3s;
-
-        &.active {
-          transform: scaleX(1);
-        }
+      &.active {
+        transform: scaleX(1);
       }
     }
   }

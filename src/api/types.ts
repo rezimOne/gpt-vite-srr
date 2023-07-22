@@ -1,8 +1,7 @@
 export interface UseOpenApiState {
   completionData: null | CompletionData;
-  history: any[]
   role: undefined,
-  lastSessionId: string
+  history: any[]
 }
 
 export interface CompletionData {
