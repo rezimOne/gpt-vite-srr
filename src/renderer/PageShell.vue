@@ -8,9 +8,8 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, computed} from 'vue'
-import Link from './Link.vue'
-import NavigationBar from '../pages/NavigationBar.vue';
+import { watch, computed } from 'vue'
+import NavigationBar from '../components/NavigationBar.vue'
 import { usePageContext } from './usePageContext';
 
 const pageContext = computed(() => usePageContext());
@@ -50,7 +49,7 @@ a {
   padding: 20px;
   /* border-left: 2px solid #eee; */
   padding-bottom: 50px;
-  min-height: 100vh;
+  min-height: 90vh;
 }
 .navigation {
   padding: 20px;
@@ -59,9 +58,5 @@ a {
   flex-direction: column;
   align-items: center;
   line-height: 1.8em;
-}
-.logo {
-  margin-top: 20px;
-  margin-bottom: 10px;
 }
 </style>

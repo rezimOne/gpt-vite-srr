@@ -16,7 +16,7 @@
 import { onMounted, ref } from 'vue';
 import useOpenAIApi from '../api/useOpenAIApi'
 import { useChatSession } from '../../src/composables/useChatSession';
-import ToggleSwitch from './index/ToggleSwitch.vue'
+import ToggleSwitch from '../components/ToggleSwitch.vue'
 const { getCompletion, getChatCompletion } = useOpenAIApi();
 
 const text = ref<string>('');
@@ -92,7 +92,7 @@ onMounted(()=> useChatSession().set('sessionStatus', true))
 }
 
 .retro-button:hover {
-  background-color: #555;
+  background-color: #6d8ed4;
 }
 
 .button-container {

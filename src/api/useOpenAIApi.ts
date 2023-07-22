@@ -27,8 +27,11 @@ export default function useOpenAiApi () {
   const get = <T extends keyof UseOpenApiState>(parametr: T) =>
     state[parametr];
 
-  const setChatRole = () => {
-    return jsonData.prompts.vueDeveloper;
+  const setChatContext = () => {
+    if(!state.history || state.history.length === 0) {
+      return jsonData.prompts.vueDeveloper;
+  } else
+    return state.history.map((item) => item.message.content);
   }
 
   const getCompletion = async (text: string, isUserAuthorized: boolean): Promise<any> => {
@@ -42,7 +45,7 @@ export default function useOpenAiApi () {
         params: {
           isUserAuthorized: isUserAuthorized,
           text: text,
-          chatRole: setChatRole()
+          chatContext: setChatContext()
         }
       });
 
@@ -94,7 +97,7 @@ export default function useOpenAiApi () {
         params: {
           isUserAuthorized: isUserAuthorized,
           text: text,
-          chatRole: setChatRole()
+          chatContext: setChatContext()
         }
       });
       if (response && response.status === 200) {
@@ -138,7 +141,7 @@ export default function useOpenAiApi () {
     get,
     getCompletion,
     getChatCompletion,
-    setChatRole,
+    setChatContext,
     getSessionStatus
   }
 }

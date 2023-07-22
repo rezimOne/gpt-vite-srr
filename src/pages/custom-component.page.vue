@@ -1,84 +1,64 @@
 <template>
-  <nav class="vertical-nav-bar">
-    <ul>
-      <li v-for="(item, index) in navItems" :key="index" @mouseover="handleMouseOver(index)">
-        <a :href="item.href" @mouseleave="handleMouseLeave(index)">
-          <span>{{ item.title }}</span>
-          <div class="hover-effect" :class="{ active: isActive(index) }" />
-        </a>
-      </li>
-    </ul>
-  </nav>
+  <div class="container">
+    <div class="sun"></div>
+    <div class="orbit">
+      <div class="planet red"></div>
+    </div>
+  </div>
 </template>
+<style scoped>
+.container {
+  position: relative;
+  height: 600px;
+  /* adjust as needed */
+  width: 600px;
+  /* adjust as needed */
+}
 
-<script setup lang="ts">
-  import { ref } from 'vue';
+.sun {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid black;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
 
-  const navItems = ref([
-    { title: 'Home', href: '/' },
-    { title: 'About', href: '/about' },
-    { title: 'Chat', href: '/chat' },
-    { title: 'Custom component', href: '/custom-component' },
-  ]);
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: top left;
+}
 
-  const activeIndex = ref(-1);
+.planet {
+  position: absolute;
+  border-radius: 50%;
+}
 
-  const handleMouseOver = (index: number) => {
-    activeIndex.value = index;
-  };
+.red {
+  border: solid 2px black;
+  width: 10px;
+  height: 10px;
+}
 
-  const handleMouseLeave = (index: number) => {
-    activeIndex.value = -1;
-  };
-
-  const isActive = (index: number) => {
-    return activeIndex.value === index;
-  };
-</script>
-
-<style scoped lang="scss">
-.vertical-nav-bar {
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: row;
-    //salign-items: flex-start;
+@keyframes orbit {
+  0% {
+    transform: rotate(0);
   }
 
-  li {
-    //margin-bottom: 10px;
-
-    a {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      color: #fff;
-      position: relative;
-      transition: color 0.3s;
-
-      &:hover {
-        color: #ff5c5c;
-      }
-
-      span {
-        margin-left: 12px;
-      }
-
-      .hover-effect {
-        width: 100%;
-        height: 2px;
-        background-color: #ff5c5c;
-        position: absolute;
-        bottom: -2px;
-        transition: transform 0.3s;
-
-        &.active {
-          transform: scaleX(1);
-        }
-      }
-    }
+  100% {
+    transform: rotate(1turn);
   }
+}
+
+.orbit:nth-child(1) {
+  animation: orbit 5s linear infinite;
+}
+
+.orbit:nth-child(2) {
+  animation: orbit 3s linear infinite;
 }
 </style>

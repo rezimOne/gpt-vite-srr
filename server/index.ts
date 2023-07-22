@@ -58,8 +58,8 @@ async function startServer() {
   app.post('/chat-completion', async(req, res, next) => {
     const text = req.query.text;
     const isUserAuthorized = req.query.isUserAuthorized;
-    const chatRole = req.query.chatRole;
-    // console.log('chatRole: ', (chatRole as string[]).join(', '));
+    const chatContext = req.query.chatContext;
+    console.log('chatContext: ',chatContext);
     const prompt = `${ text }`;
 
     try {
@@ -74,7 +74,7 @@ async function startServer() {
           messages: [
                 {
                   "role": "system",
-                  "content": `${(chatRole as string[]).join(', ')}`
+                  "content": `${(chatContext as string[]).join(', ')}`
                 },
                 {
                   role: "user",
