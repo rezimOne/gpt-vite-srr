@@ -10,7 +10,6 @@ import type { PageContextServer } from './types'
 
 export async function render(pageContext: PageContextServer) {
   const { Page, pageProps } = pageContext
-  //console.log('3_default.page.server.ts: pageContext: ', pageContext);
   // This render() hook only supports SSR, see https://vite-plugin-ssr.com/render-modes for how to modify render() to support SPA
   if (!Page) throw new Error('My render() hook expects pageContext.Page to be defined')
 
