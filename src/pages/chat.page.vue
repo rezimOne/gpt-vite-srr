@@ -89,6 +89,8 @@ onMounted(()=> useChatSession().set('sessionStatus', true))
   cursor: pointer;
   border-radius: 5px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+  width: 90px;
+  justify-content: center;
 }
 
 .retro-button:hover {

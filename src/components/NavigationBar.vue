@@ -17,8 +17,7 @@
   const navItems = ref([
     { title: 'Home', href: '/' },
     { title: 'About', href: '/about' },
-    { title: 'Chat', href: '/chat' },
-    { title: 'Custom component', href: '/custom-component' },
+    { title: 'Chat', href: '/chat' }
   ]);
 
   const activeIndex = ref(-1);

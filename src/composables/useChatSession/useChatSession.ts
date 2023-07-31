@@ -10,7 +10,7 @@ const state = reactive<ChatSession>({
 
 watch(
   () => state.chatHistory,
-  (data): void => console.log('state.chatHistory: ', data));
+  (data): void => console.log(data));
 
 export default function useChatSession() {
   const set = <T extends keyof ChatSession>(

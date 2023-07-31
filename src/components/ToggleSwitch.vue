@@ -33,6 +33,7 @@ watch(isActive, (isActive: boolean): void => {
   border: none;
   padding: 2px;
   cursor: pointer;
+  background: rgb(85, 76, 113);
 }
 
 .toggle-icon {
@@ -41,7 +42,7 @@ watch(isActive, (isActive: boolean): void => {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background-color: #fff;
+  background-color: #777;
   top: 2px;
   left: 2px;
   transition: transform 0.3s ease-in-out;
@@ -49,5 +50,6 @@ watch(isActive, (isActive: boolean): void => {
 
 .toggle-on {
   transform: translateX(20px);
+  background: #557c46;
 }
 </style>

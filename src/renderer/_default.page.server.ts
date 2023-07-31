@@ -52,7 +52,6 @@ async function renderToString(app: App) {
     err = err_
   }
   const appHtml = await renderToString_(app)
-  //console.log('_default.page.server appHtml: ', appHtml);
   if (err) throw err
   return appHtml
 }

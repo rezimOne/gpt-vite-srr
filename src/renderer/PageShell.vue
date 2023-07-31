@@ -19,7 +19,7 @@ watch(
   (pageContext) => {
     console.log('pageContext: ', pageContext.urlPathname);
   },
-  {deep: true}
+  { deep: true }
 )
 
 </script>
@@ -28,7 +28,7 @@ watch(
 body {
   margin: 0;
   font-family: sans-serif;
-  background: rgb(98, 128, 105);
+  background: #628069;
 }
 * {
   box-sizing: border-box;
