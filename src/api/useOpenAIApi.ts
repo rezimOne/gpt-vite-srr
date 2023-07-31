@@ -31,7 +31,7 @@ export default function useOpenAiApi () {
     if(!state.history || state.history.length === 0) {
       return jsonData.prompts.vueDeveloper;
   } else
-    return state.history.map((item) => item.message.content);
+    return state.history.map((item) => item.message);
   }
 
   const getCompletion = async (text: string, isUserAuthorized: boolean): Promise<any> => {

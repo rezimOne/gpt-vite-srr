@@ -3,7 +3,7 @@ import express from 'express'
 import compression from 'compression'
 import { renderPage } from 'vite-plugin-ssr/server'
 import { rootPath } from './root.js'
-import { OpenAIApi } from 'openai';
+import { ChatCompletionRequestMessage, OpenAIApi } from 'openai';
 import { COMPLETION_SETTINGS, CHATMODEL, PORT, MODEL, ISPRODUCTION, CONFIGURATION, completionModel} from './utils.js';
 
 startServer()
@@ -59,7 +59,7 @@ async function startServer() {
     const text = req.query.text;
     const isUserAuthorized = req.query.isUserAuthorized;
     const chatContext = req.query.chatContext;
-    console.log('chatContext: ',chatContext);
+    console.log('chatContext: ', chatContext);
     const prompt = `${ text }`;
 
     try {
@@ -71,15 +71,7 @@ async function startServer() {
         const response = await openai.createChatCompletion({
           model: CHATMODEL!,
           ...COMPLETION_SETTINGS,
-          messages: [
-                {
-                  "role": "system",
-                  "content": `${(chatContext as string[]).join(', ')}`
-                },
-                {
-                  role: "user",
-                  content: prompt
-              }]
+          messages: chatContext as []
         });
 
         const completion = completionModel(response);
