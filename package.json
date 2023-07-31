@@ -1,9 +1,9 @@
 {
-  "name": "jackie",
+  "name": "vite-ssr-plugin",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
-  "author": "",
+  "author": "rezimOne",
   "license": "ISC",
   "main": "index.js",
   "type": "module",
